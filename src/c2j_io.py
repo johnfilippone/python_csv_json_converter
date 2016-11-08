@@ -1,3 +1,4 @@
+import sys
 import csv
 import json
 import codecs
@@ -8,30 +9,22 @@ def convert_to_json(input_filename, output_filename):
     with codecs.open(input_filename, encoding="utf8") as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
 
-        rows = []
         try:
+            json_data = []
+            rows = []
+            headers = next(readCSV)
             for row in readCSV:
-                rows.append(row)
-        except UnicodeDecodeError:
+                d = dict()
+                for i, header in enumerate(headers):
+                    d[header] = row[i]
+                json_data.append(d)
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            print >> sys.stderr, "CSV Format Error"
             pass        
-        except UnicodeEncodeError:
-            pass        
-
-        headers = rows[0]
-        rows = rows[1:]
-        rows.sort()
-
-
-    data_dic = []
-    for i, row in enumerate(rows):
-        my_dict = {'id':i}
-        for j, header in enumerate(headers):
-            my_dict[header] = row[j]
-        data_dic.append(my_dict)
 
 
     out_file = open(output_filename,"w")
-    json.dump(data_dic, out_file, indent=4)
+    json.dump(json_data, out_file, indent=4)
     out_file.close()
 
 
